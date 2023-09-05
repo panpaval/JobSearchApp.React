@@ -1,0 +1,10 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400&display=swap');
+
+.inputWrapper {
+    width: 773px;
+    
+  }
+  
+  .custom-input::placeholder {
+    color: red;
+  }

@@ -1,0 +1,14 @@
+.activeStar .star-icon{
+    stroke: #5E96FC;
+    fill:  #5E96FC;
+}
+
+/* .activeStar .icon-tabler-star{
+    fill: #5E96FC;
+}  */
+
+.star .star-icon{ 
+    stroke: #ACADB9;
+    fill:transparent;
+}
+
