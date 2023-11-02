@@ -3,16 +3,14 @@ import { useState, useCallback } from 'react';
 import './jobItem.css'
 
 
-function Item({data, onClick }) {
+function Item({data, onClick}) {
     
 const [activeStar, setActiveStar] = useState(false)
  
-useCallback( () => {console.log(data.type_of_work)}, [])
 
 const handleClick = () => {
-    
-    setActiveStar((prevState) => !prevState)
-    }
+   setActiveStar((prevState) => !prevState)
+}
 
 
     return (

@@ -1,14 +1,11 @@
-import { useState } from 'react';
-import {
-  Button,
-  Select,
-  NumberInput,
-  Box,
-  Group,
-  useMantineTheme,
-} from '@mantine/core';
+import { useState, useEffect, useCallback } from 'react';
+import { Button, Select, NumberInput, Box, useMantineTheme} from '@mantine/core';
 import './filter.css'
 import { ChevronDown, ChevronUp } from 'tabler-icons-react';
+import { FetchSuperJobData } from '../services/Superjobservice';
+import { useFetchIndustries } from './filterHook';
+
+
 
 const initialFilters = {
   industry: '',
@@ -17,8 +14,25 @@ const initialFilters = {
 };
 
 function Filter() {
+  
   const [filters, setFilters] = useState(initialFilters);
   const theme = useMantineTheme();
+  
+
+  const industriesData = useFetchIndustries();
+  console.log(industriesData)
+  let options;
+  if (industriesData) {
+    options = industriesData?.map(item => ({
+    value: item.key,
+    label: item.title_rus
+  }));
+  }
+
+  /* const options = industriesData?.map(item => ({
+    value: item.key,
+    label: item.title_rus
+  })); */
 
   const handleResetFilters = () => {
     setFilters(initialFilters);
@@ -37,6 +51,12 @@ function Filter() {
     console.log(formData); // Обрабатываем данные формы
   };
 
+  
+  
+  
+  
+  
+  
   return (
 
     
@@ -57,11 +77,7 @@ function Filter() {
           styles={{ rightSection: { pointerEvents: 'none' } }}
           size='md'
           transitionProps={{ transition: 'pop-top-left', duration: 200, timingFunction: 'ease' }}
-          data={[
-            { value: 'it', label: 'IT' },
-            { value: 'finance', label: 'Финансы' },
-            { value: 'marketing', label: 'Маркетинг' },
-          ]}
+          data={options}
           placeholder="Выберите отрасль"
           value={filters.industry}
           onChange={(value) => handleFilterChange('industry', value)}

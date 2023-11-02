@@ -104,44 +104,45 @@ const JobList = () => {
   };
 
   const handleClickToJobDescription = (id) => {
+    
     setSelectedJobId(id); //правильно достаю Id?
+    /* console.log(selectedJobId) */
 }
 
 
 
-
-  return (
-    <div>
-
-        {selectedJobId ? (
-          <JobDescription jobId={selectedJobId} />
+return (
+  <div>
+    {selectedJobId ? (
+      <JobDescription jobId={selectedJobId} />
+    ) : (
+      <>
+        {loading ? (
+          <SkeletonForJobList />
         ) : (
-          <>
-            {loading ? <><SkeletonForJobList /></> : limitedData.map((item) => (
-              <Item key={item.id} data={item} onClick={() => handleClickToJobDescription(item.id)} />
-            ))}
-          </>
+          limitedData.map((item) => (
+            <Item key={item.id} data={item} onClick={() => handleClickToJobDescription(item.id)} />
+          ))
         )}
+        
+        <div>
+          <Pagination
+            total={totalPages}
+            value={currentPage}
+            onChange={handlePaginationChange}
+            style={{
+              marginLeft: 'auto',
+              marginRight: 'auto',
+              width: 'fit-content',
+              paddingTop: '40px',
+            }}
+          />
+        </div>
+      </>
+    )}
+  </div>
+);
 
-{/*         {loading ? <> <SkeletonForJobList /> </>: limitedData.map((item) => (
-          <Item key={item.id} data={item} />
-        ))} */}
-      
-      <div>
-        <Pagination
-          total={totalPages}
-          value={currentPage}
-          onChange={handlePaginationChange}
-          style={{
-            marginLeft: 'auto',
-            marginRight: 'auto',
-            width: 'fit-content',
-            paddingTop: '40px',
-          }}
-        />
-      </div>
-    </div>
-  );
 };
 
 export default JobList;
