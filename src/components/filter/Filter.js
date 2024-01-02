@@ -1,10 +1,11 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useContext } from 'react';
+import { JobsContext } from '../app/App';
 import { Button, Select, NumberInput, Box, useMantineTheme} from '@mantine/core';
 import './filter.css'
 import { ChevronDown, ChevronUp } from 'tabler-icons-react';
-import { FetchSuperJobData } from '../services/Superjobservice';
 import { useFetchIndustries } from './filterHook';
-
+import { request } from '../services/Superjobservice';
+import { processData } from '../jobList/processData';
 
 
 const initialFilters = {
@@ -16,30 +17,85 @@ const initialFilters = {
 function Filter() {
   
   const [filters, setFilters] = useState(initialFilters);
+
+  const {
+          setData, 
+          setPaymentFromForContext, 
+          setLoadedPages, 
+          setParamsForJLRequest, 
+          setKeyword, 
+          setCurrentPage, 
+          setLoadingMore,  
+          keyword,
+          setPageForRequest } = useContext(JobsContext)
+
   const theme = useMantineTheme();
-  
 
   const industriesData = useFetchIndustries();
-  console.log(industriesData)
-  let options;
-  if (industriesData) {
-    options = industriesData?.map(item => ({
+  
+   const options = industriesData?.map(item => ({
     value: item.key,
     label: item.title_rus
   }));
-  }
 
-  /* const options = industriesData?.map(item => ({
-    value: item.key,
-    label: item.title_rus
-  })); */
+  
+   const processDataWrapper = async (data, params) => {    
+    const page = 0;
+    let filteredData = data.filter(item => item.payment_from >= params.payment_from);
+    
+    if(filteredData.length < 20) {
+      filteredData = await processData(request, params, params.payment_from, keyword, page); 
+    }
+    const newData = filteredData;
+
+    return newData     
+  } 
+  
+  const handleSubmit = async () => {
+    const page = 0;
+    setPageForRequest(1);
+
+    let data;
+    console.log('filters', filters)
+    const params = {
+      catalogues: filters.industry, 
+      payment_from: filters.salaryMin,
+      payment_to: filters.salaryMax
+    };
+    
+    if(params.catalogues) {
+      setKeyword('');
+      setCurrentPage(1);
+    }
+    setPaymentFromForContext(params.payment_from);
+    setParamsForJLRequest(params)
+    setLoadingMore(true);
+    
+    if(params.catalogues || params.payment_from){
+       data = await request(params, keyword, page);
+      }
+    if(data){
+    const filteredData = await processDataWrapper(data, params);//обернул в условие что бы починит баг с красным экрамном после "применить" на пустых фильтрах
+    setData(filteredData);
+    console.log('filteredData', filteredData)
+    }
+    
+    setLoadedPages([]);
+    setLoadingMore(false);
+     
+  }
+      
 
   const handleResetFilters = () => {
     setFilters(initialFilters);
+    setLoadedPages([]);
+    setKeyword('');
+    setCurrentPage(1);
+    setLoadingMore(false);
+    setPageForRequest(1);
   };
 
   const handleFilterChange = (field, value) => {
-
     if (value < 0) {
       value = 0;
     }
@@ -47,14 +103,6 @@ function Filter() {
     setFilters((prevFilters) => ({ ...prevFilters, [field]: value }));
   };
 
-  const handleSubmit = (formData) => {
-    console.log(formData); // Обрабатываем данные формы
-  };
-
-  
-  
-  
-  
   
   
   return (
@@ -129,9 +177,12 @@ function Filter() {
             onChange={(value) => handleFilterChange('salaryMax', value)}
           />
 
-        <Button style={{ marginTop: theme.spacing.md, backgroundColor: '#5E96FC', borderRadius: '8px', height: '40px', width: '275px' }}
+        <Button  
         
+        onClick={handleSubmit}
+        style={{ marginTop: theme.spacing.md, backgroundColor: '#5E96FC', borderRadius: '8px', height: '40px', width: '275px' }}
         type="submit" variant="filled" >
+          
           Применить
         </Button>
       </Box>
@@ -144,18 +195,25 @@ function Filter() {
 export default Filter;
 
 
-/*   const handleIncrement = () => {
-    console.log('clic ebany')
-    setFilters((prevFilters) => ({
-      ...prevFilters,
-      salaryMin: Number(prevFilters.salaryMin) + 5000, 
-    }));
-  };
+/*     let filteredData = data.filter(item => item.payment_from >= params.payment_from);
+    
+    if(filteredData.length < 20) {
+      const additionalData = await request(params);
+      const filteredAdditionalData = additionalData.filter(item => item.payment_from >= params.payment_from);
+      filteredData = [...filteredData, ...filteredAdditionalData];
+    }
 
-  const handleDecrement = () => {
-    setFilters((prevFilters) => ({
-      ...prevFilters,
-      salaryMin: Number(prevFilters.salaryMin) - 5000, 
-    }));
+    let newData = filteredData;
+    
+    while(newData.length < 20) {
+      const additionalData = await request(params);
+      const filteredAdditionalData = additionalData.filter(item => item.payment_from >= params.payment_from);
+      newData = [...newData, ...filteredAdditionalData];
+      
+    }
 
-  }; используя этот вариант нужно было продублировать этот код с salaryMax и передеать в соответвующие onClick={}*/
+    if(newData.length > 20) {
+      newData = newData.slice(0, 20);
+    }
+
+    return newData */

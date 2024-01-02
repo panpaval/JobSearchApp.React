@@ -1,17 +1,18 @@
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
-import { FetchSuperJobData } from '../services/Superjobservice';
+import { useState, useEffect, useCallback, useMemo, useContext } from 'react';
 import SkeletonForJobList from '../skeleton/skeleton';
 import './jobdescription.css'
+import { JobsContext } from '../app/App';
+import { requestSingleVacancy } from '../services/Superjobservice';
 
 function useFetchJobDetails(jobId) {
-
-  const [loading, setLoading] = useState(false);
   const [jobDetails, setJobDetails] = useState(null);
-  const { requestSingleVacancy } = FetchSuperJobData();
+  const { loadingMore, setLoadingMore } = useContext(JobsContext);
+
+  
   // Используем useCallback для мемоизации функции запроса
   const fetchDetails = useCallback(async () => {
-    setLoading(true);
+    setLoadingMore(true);
     
     try {
       const response = await requestSingleVacancy(jobId);
@@ -20,7 +21,7 @@ function useFetchJobDetails(jobId) {
     } catch (error) {
       console.error(error);
     } finally {
-      setLoading(false); 
+      setLoadingMore(false); 
     }
 
   }, [ requestSingleVacancy, jobId]);
@@ -31,7 +32,7 @@ function useFetchJobDetails(jobId) {
     }
   }, [ fetchDetails, jobId])
 
-  return { loading, jobDetails };
+  return { loadingMore, jobDetails };
 
 }
 
@@ -40,7 +41,7 @@ function useFetchJobDetails(jobId) {
 const JobDescription = ({ jobId }) => {
 
 
-  const { loading, jobDetails } = useFetchJobDetails(jobId);
+  const { loadingMore, jobDetails } = useFetchJobDetails(jobId);
 
   const vacancyRichText = jobDetails?.vacancyRichText;
   const profession = jobDetails?.profession;
@@ -54,7 +55,7 @@ const JobDescription = ({ jobId }) => {
 
     //сделать условие на loading что бы подставлять скелетон во время зашрузки
 <div>
-      {loading ? (
+      {loadingMore ? (
         // Если loading равно true, показываем скелетон или текст загрузки
         <SkeletonForJobList />
       ) : (
